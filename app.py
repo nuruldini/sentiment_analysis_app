@@ -1,13 +1,10 @@
 import streamlit as st
-from transformers import pipeline
+from textblob import TextBlob
 import pandas as pd
 import io
 
 # Title of the app
 st.title("Sentiment Analysis App")
-
-# Load pre-trained sentiment analysis model from Hugging Face
-sentiment_analyzer = pipeline('sentiment-analysis')
 
 # User input: Sentence or File upload
 input_type = st.selectbox("Select input type", ("Sentence", "File"))
@@ -16,12 +13,12 @@ input_type = st.selectbox("Select input type", ("Sentence", "File"))
 if input_type == "Sentence":
     sentence = st.text_input("Enter a sentence:")
     if sentence:
-        # Sentiment analysis using Hugging Face's transformer model
-        result = sentiment_analyzer(sentence)
-        sentiment = result[0]['label']
-        if sentiment == "POSITIVE":
+        # Sentiment analysis using TextBlob
+        blob = TextBlob(sentence)
+        sentiment = blob.sentiment.polarity
+        if sentiment > 0:
             st.write("Sentiment: Positive")
-        elif sentiment == "NEGATIVE":
+        elif sentiment < 0:
             st.write("Sentiment: Negative")
         else:
             st.write("Sentiment: Neutral")
@@ -36,12 +33,12 @@ elif input_type == "File":
             # Assuming there's a column with text data, modify if needed
             for index, row in df.iterrows():
                 text = row[0]  # assuming text is in the first column
-                result = sentiment_analyzer(str(text))
-                sentiment = result[0]['label']
+                blob = TextBlob(str(text))
+                sentiment = blob.sentiment.polarity
                 st.write(f"Sentence: {text}")
-                if sentiment == "POSITIVE":
+                if sentiment > 0:
                     st.write("Sentiment: Positive")
-                elif sentiment == "NEGATIVE":
+                elif sentiment < 0:
                     st.write("Sentiment: Negative")
                 else:
                     st.write("Sentiment: Neutral")
@@ -49,12 +46,12 @@ elif input_type == "File":
             file_content = uploaded_file.read().decode("utf-8")
             sentences = file_content.splitlines()
             for sentence in sentences:
-                result = sentiment_analyzer(sentence)
-                sentiment = result[0]['label']
+                blob = TextBlob(sentence)
+                sentiment = blob.sentiment.polarity
                 st.write(f"Sentence: {sentence}")
-                if sentiment == "POSITIVE":
+                if sentiment > 0:
                     st.write("Sentiment: Positive")
-                elif sentiment == "NEGATIVE":
+                elif sentiment < 0:
                     st.write("Sentiment: Negative")
                 else:
                     st.write("Sentiment: Neutral")
