@@ -1,57 +1,71 @@
 import streamlit as st
-from textblob import TextBlob
-import pandas as pd
-import io
+from nltk.sentiment import SentimentIntensityAnalyzer
+import nltk
 
-# Title of the app
-st.title("Sentiment Analysis App")
+# Download the VADER lexicon if not already available
+nltk.download("vader_lexicon")
 
-# User input: Sentence or File upload
-input_type = st.selectbox("Select input type", ("Sentence", "File"))
+# Initialize VADER Sentiment Analyzer
+sia = SentimentIntensityAnalyzer()
 
-# Sentiment analysis for a sentence
-if input_type == "Sentence":
-    sentence = st.text_input("Enter a sentence:")
-    if sentence:
-        # Sentiment analysis using TextBlob
-        blob = TextBlob(sentence)
-        sentiment = blob.sentiment.polarity
-        if sentiment > 0:
-            st.write("Sentiment: Positive")
-        elif sentiment < 0:
-            st.write("Sentiment: Negative")
-        else:
-            st.write("Sentiment: Neutral")
+# Page configuration
+st.set_page_config(
+    page_title="Sentiment Analysis App",
+    page_icon="🌟",
+    layout="centered"
+)
 
-# Sentiment analysis for a file upload
-elif input_type == "File":
-    uploaded_file = st.file_uploader("Upload a text file", type=["txt", "csv"])
-    if uploaded_file is not None:
-        # Read and process the uploaded file
-        if uploaded_file.name.endswith('csv'):
-            df = pd.read_csv(uploaded_file)
-            # Assuming there's a column with text data, modify if needed
-            for index, row in df.iterrows():
-                text = row[0]  # assuming text is in the first column
-                blob = TextBlob(str(text))
-                sentiment = blob.sentiment.polarity
-                st.write(f"Sentence: {text}")
-                if sentiment > 0:
-                    st.write("Sentiment: Positive")
-                elif sentiment < 0:
-                    st.write("Sentiment: Negative")
-                else:
-                    st.write("Sentiment: Neutral")
-        elif uploaded_file.name.endswith('txt'):
-            file_content = uploaded_file.read().decode("utf-8")
-            sentences = file_content.splitlines()
-            for sentence in sentences:
-                blob = TextBlob(sentence)
-                sentiment = blob.sentiment.polarity
-                st.write(f"Sentence: {sentence}")
-                if sentiment > 0:
-                    st.write("Sentiment: Positive")
-                elif sentiment < 0:
-                    st.write("Sentiment: Negative")
-                else:
-                    st.write("Sentiment: Neutral")
+# Page title and description
+st.title("🌟 Sentiment Analysis App 🌟")
+st.write("""
+Welcome to the **Sentiment Analysis App**!  
+Type a sentence below to analyze its sentiment as **Positive**, **Negative**, or **Neutral**.
+""")
+
+# Sidebar styling and information
+st.sidebar.title("About")
+st.sidebar.info("""
+This app uses the **VADER Sentiment Analysis** model to evaluate the sentiment of user-provided text.  
+Created with ❤️ using [Streamlit](https://streamlit.io).
+""")
+
+# User input for sentiment analysis
+st.subheader("Enter a sentence:")
+sentence = st.text_input("Type your sentence below:")
+
+# Analyze sentiment if a sentence is entered
+if sentence:
+    # Use VADER to compute sentiment scores
+    scores = sia.polarity_scores(sentence)
+    compound_score = scores['compound']
+    
+    # Determine sentiment category
+    if compound_score >= 0.05:
+        sentiment = "Positive 😊"
+    elif compound_score <= -0.05:
+        sentiment = "Negative 😔"
+    else:
+        sentiment = "Neutral 😐"
+    
+    # Display the results
+    st.write("### Sentiment Analysis Result:")
+    st.markdown(f"**Sentiment:** {sentiment}")
+    st.markdown(f"**Compound Score:** {compound_score:.2f}")
+    st.markdown(f"""
+    - **Positive:** {scores['pos']:.2f}  
+    - **Neutral:** {scores['neu']:.2f}  
+    - **Negative:** {scores['neg']:.2f}
+    """)
+
+# Footer with decoration
+st.markdown("---")
+st.markdown("""
+<style>
+footer {visibility: hidden;}
+.reportview-container .main footer {visibility: hidden;}
+header {visibility: hidden;}
+</style>
+<div style="text-align: center; color: gray;">
+    <small>Developed with ❤️ by [Your Name]</small>
+</div>
+""", unsafe_allow_html=True)
