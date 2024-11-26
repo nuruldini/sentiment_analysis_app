@@ -66,6 +66,6 @@ footer {visibility: hidden;}
 header {visibility: hidden;}
 </style>
 <div style="text-align: center; color: gray;">
-    <small>Developed with ❤️ by [Your Name]</small>
+    <small>Developed with ❤️ by [NURUL DINI FAQRIAH]</small>
 </div>
 """, unsafe_allow_html=True)
